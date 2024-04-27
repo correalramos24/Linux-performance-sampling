@@ -4,6 +4,8 @@
 Repository to gather utilities for gather performance indicators from 
 the OS statistics and generate plots offline for performance analysis.
 
+## Performance metrics
+
 ## Memory sampling
 
 > TODO: memory-profiling reference
