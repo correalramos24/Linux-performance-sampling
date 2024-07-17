@@ -1,6 +1,37 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from bokeh.plotting import figure, show, output_file
+from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.palettes import Turbo256
+
+def plot_with_bokeh(df: pd.DataFrame, title: str):
+    pids = df['PID'].unique()
+    p = figure( title=title, 
+                x_axis_label='Time', 
+                y_axis_label='CPU Usage (%) blue - SYS Time (%) red - WAIT %',
+                sizing_mode="stretch_width")
+    
+    
+
+    for i, pid in enumerate(pids):
+        pid_data = df[df['PID'] == pid]
+        command = df[df['PID'] == pid]["Command"].iloc[0]
+        source = ColumnDataSource(pid_data)
+        p.line('Timestamp', '%CPU', source=source, line_width=2, color="blue")
+#        p.line('Timestamp', '%system', source=source, line_width=2, color="red")
+#        p.line('Timestamp', '%wait', source=source, line_width=2, color="orange")
+
+    hover = HoverTool()
+    hover.tooltips = [
+        ("Timestamp", "@Timestamp"),
+        ("PROC", "@Command")
+    ]
+    p.add_tools(hover)
+    #show(p)
+    return p
+
+
 
 
 def plot_pidstat(num_cpus : int, df: pd.DataFrame):
@@ -20,5 +51,5 @@ def plot_pidstat(num_cpus : int, df: pd.DataFrame):
     plt.grid(True)
     plt.tight_layout()
     plt.xticks(rotation=45)
-    plt.tight_layout()
+    plt.legend(loc='best')
     plt.show()

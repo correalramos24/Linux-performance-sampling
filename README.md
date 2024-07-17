@@ -10,6 +10,7 @@ the OS statistics and generate plots offline for performance analysis.
     - [Usage](#usage)
   - [Performance metrics](#performance-metrics)
   - [I/O performance sampling](#io-performance-sampling)
+  - [PIDSTAT](#pidstat)
 
 
 ## Installation
@@ -95,3 +96,8 @@ pidstat -d -h --dec=0 $SAMP_INTERVAL
 pidstat -d -h --dec=0 $SAMP_INTERVAL   | grep -v '^# Time' &> io_sampling.log
 ````
 
+## PIDSTAT
+
+```bash
+pidstat -u $SAMP_TIME $NUM_SAMPLES &> samp.log
+```
