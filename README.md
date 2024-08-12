@@ -41,27 +41,24 @@ For clusters using SLURM scheduling system, you can use `slurm.sh <jobId>`
 for run the free command. If you don't have a parallel filesystem you need to
 gather all the files
 
-> It's important to don't use the human-redable option (`-h, --human`).
+> It's important to NOT use the human-redable option (`-h, --human`). This 
+> feature will be added in a future to avoid use --units and --scale
 
 There are several arguments for the plotting app (save name, units, 
 plot percentatge), but the file and the sample time are mandatory args.
 
 ```bash
-  -h, --help            
-  --files FILES [FILES ...]
-                        Input files, can use wildcard like *
-  --samp SAMP           Sampling time
+  -h, --help            show this help message and exit
+  --input INPUT [INPUT ...]
+                        Input file(s), can use wildcard like *
+  --samp SAMP           Sampling time of the input file(s)
   --save SAVE           Enable and define save file name
   --swap                Enable swap plotting
   --total               Enable total memory available?
   --percentage          Plot perc of usage
   --legend              Plot legend
-  --output_units OUTPUT_UNITS
-                        Set output units for the plots
-  --output_scale OUTPUT_SCALE
-                        Factor that will be divide the memory results
-  --file_pattern FILE_PATTERN
-                        Set the file pattern for the input files
+  --units UNITS         Set output units for the plots
+  --scale SCALE         Factor that will be divide the memory results
 ```
 
 Next code block shows you an example of the units managment. The input file
@@ -71,7 +68,7 @@ GiB in the plot:
 ```bash
 # Example :
 ./app/main.py --samp 2 --files test_inputs/alfa-mem.log --output_units GiB \
---output_scale 1048576
+--output_scale $((1024*1024))
 ```
 
 ## Performance metrics
