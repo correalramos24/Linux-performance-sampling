@@ -18,12 +18,12 @@ def main():
             print(f"Parsing {file} file from host {hostnames[-1]} ...")
             data = parse_mem_file(file, swap)
             
-            # Compute the percentage, if required!
-            if percnt and len(data) > 0:
-                data["used_perc"] = data["used"] / data["total"]
-                if swap:
-                    data["used_swap_perc"] = data["used_swap"] / data["total_swap"]
-            
+            # Compute the percentage, scale units, if required!
+            if len(data) > 0 and (percnt or unit_s != 1):
+                if unit_s != 1 and not percnt:
+                    data = scale_data(data, swap, unit_s)
+                if percnt:
+                    data = compute_percnt(data, unit_s)
             # Append data to plot later
             results.append(data)
 

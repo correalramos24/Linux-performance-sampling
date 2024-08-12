@@ -20,10 +20,10 @@ parser.add_argument('--percentage', action='store_true',
                     help="Plot perc of usage")
 parser.add_argument('--legend', action='store_true', 
                     help="Plot legend")
-parser.add_argument('--output_units', default="KiB",
+parser.add_argument('--units', default="KiB",
                     help="Set output units for the plots")
-#parser.add_argument('--output_scale', default=1, 
-#                    help="Factor that will be divide the memory results")
+parser.add_argument('--scale', default=1, 
+                    help="Factor that will be divide the memory results")
 app_args = parser.parse_args()
 
 files  : list[Path] = app_args.input
@@ -36,8 +36,8 @@ percnt : bool = app_args.percentage
 legend : bool = app_args.legend
 save   : str  = app_args.save
 
-unit_o : str  = app_args.output_units
-#unit_s : int  = int(app_args.output_scale)
+unit_o : str  = app_args.units
+unit_s : int  = int(app_args.scale)
 
 f_pat  : str  = "-mem.log"
 
@@ -45,4 +45,5 @@ if files is None:
     print("Error: No input files specified")
     exit(1)
 print("Sampling time set to", sampl)
+print("Using scale as", unit_s)
 print("Units set to", unit_o)

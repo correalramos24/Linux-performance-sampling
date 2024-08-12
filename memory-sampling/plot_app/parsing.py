@@ -6,8 +6,7 @@ from pathlib import Path
 cols_mem = ["timing","total","used","free","shared","buff/cache","available"]
 cols_swp = ["total_swap", "used_swap", "free_swap"]
 
-def parse_mem_file(fPath : Path, swap: bool = False, samp_time: int = 1,
-                   file_pattern="-mem.log") -> pd.DataFrame :
+def parse_mem_file(fPath : Path, swap: bool = False, samp_time: int = 1) -> pd.DataFrame :
 
     """Parser for a file from free command.
     Args:
@@ -38,3 +37,15 @@ def parse_mem_file(fPath : Path, swap: bool = False, samp_time: int = 1,
     
     return df
 
+def compute_percnt(info: pd.DataFrame, swap: bool) -> pd.DataFrame:
+    info["used_perc"] = info["used"] / info["total"]
+    if swap:
+        info["used_swap_perc"] = info["used_swap"] / info["total_swap"]
+    return info
+
+def scale_data(info: pd.DataFrame, swap: bool, scale_factor: int) -> pd.DataFrame:
+    not_timing = info.columns.difference(["timing"])
+    info[not_timing] = info[not_timing].apply(lambda x : x / scale_factor)
+    info[not_timing] = info[not_timing].round(2)
+
+    return info
