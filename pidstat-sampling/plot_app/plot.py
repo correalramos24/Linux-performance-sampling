@@ -3,24 +3,41 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from bokeh.plotting import figure, show, output_file
 from bokeh.models import ColumnDataSource, HoverTool
-from bokeh.palettes import Turbo256
+from bokeh.palettes import viridis
 
-def plot_with_bokeh(df: pd.DataFrame, title: str):
+def plot_with_bokeh(df: pd.DataFrame, title: str, mode="cpu"):
     pids = df['PID'].unique()
+    names= df['Command'].unique()
+
+    if mode == "cpu":
+        y_axis="CPU Usage (%)"
+    if mode == 'io':
+        y_axis="kB_rd/s"
+
+    print(df.head(6))
+
     p = figure( title=title, 
                 x_axis_label='Time', 
-                y_axis_label='CPU Usage (%) blue - SYS Time (%) red - WAIT %',
+                y_axis_label=y_axis,
                 sizing_mode="stretch_width")
+    #print(f"Found {len(pids)}  unique PIDs")
+    #print(f"Found {len(names)} unique PID names")
     
-    
+    color_palette = viridis(len(pids))
+    #colors = dict(zip(names, color_palette))
 
     for i, pid in enumerate(pids):
         pid_data = df[df['PID'] == pid]
         command = df[df['PID'] == pid]["Command"].iloc[0]
         source = ColumnDataSource(pid_data)
-        p.line('Timestamp', '%CPU', source=source, line_width=2, color="blue")
-#        p.line('Timestamp', '%system', source=source, line_width=2, color="red")
-#        p.line('Timestamp', '%wait', source=source, line_width=2, color="orange")
+        if mode == "cpu":
+            p.line('Timestamp', '%CPU', source=source, line_width=2, color=color_palette[i])
+        if mode == 'io':
+            p.line('Timestamp', "kB_rd/s", source=source, line_width=2, color=color_palette[i])
+            #p.line('Timestamp','kB_wr/s', source=source, line_width=2, color=color_palette[i])
+            #p.line('Timestamp','kB_ccwr/s', source=source, line_width=2, color=color_palette[i])
+            #p.line('Timestamp','iodelay', source=source, line_width=2, color=color_palette[i])           
+            
 
     hover = HoverTool()
     hover.tooltips = [
@@ -28,7 +45,6 @@ def plot_with_bokeh(df: pd.DataFrame, title: str):
         ("PROC", "@Command")
     ]
     p.add_tools(hover)
-    #show(p)
     return p
 
 

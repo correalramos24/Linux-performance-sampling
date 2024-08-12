@@ -2,12 +2,17 @@ import sys
 from pathlib import Path
 from parsers import *
 from plot import *
-from bokeh.plotting import figure, show
+from bokeh.plotting import output_file, save
 from bokeh.layouts import column
 
 USE_REALTIVE_TS=True
 DROP_PIDS=False
 DROP_PIDS_AGRESIVE=True
+SPLIT_PLOTS=False
+#TARGET_APP="ifsMASTER.SP"
+TARGET_APP="nemo"
+MODE="cpu"
+#MODE='io'
 
 def main():
 
@@ -16,14 +21,13 @@ def main():
         print(f"Usage: {sys.argv[0]} <pidstat-log-file>")
         sys.exit(1)
     
-    
     plots = []
 
     for pidstat_file in sys.argv[1:]:
         # Parse file:
         #pidstat_file = Path(sys.argv[1])
         print(f"Parsing {pidstat_file}...")
-        num_cpus, df = parse_pidstat_file(pidstat_file)
+        num_cpus, df = parse_pidstat_file(pidstat_file, MODE, TARGET_APP)
         print(f"Completed! Found {len(df)} records for {num_cpus} CPU!")
 
         # Convert timestamp to human-readable:
@@ -47,17 +51,25 @@ def main():
 
     #print(df)
     #plot_pidstat(num_cpus, df)
-        df_nemo = df[df['Command'] == 'nemo']
-        df_mmfsd = df[df['Command'] == 'mmfsd']
-        df_others = df[df['Command'] != 'nemo']
-        plots.append(plot_with_bokeh(df_nemo, f"{pidstat_file} : nemo PIDs"))
-        plots.append(plot_with_bokeh(df_mmfsd, f"{pidstat_file} : mfsd PIDs"))
-        plots.append(plot_with_bokeh(df_others, f"{pidstat_file} : others PIDs"))
+        if SPLIT_PLOTS:
+            df_nemo = df[df['Command'] == TARGET_APP]
+            df_mmfsd = df[df['Command'] == 'mmfsd']
+            df_others = df[df['Command'] != 'nemo']
+            plots.append(plot_with_bokeh(df_nemo, f"{pidstat_file} : {TARGET_APP} PIDs"))
+            plots.append(plot_with_bokeh(df_mmfsd, f"{pidstat_file} : mfsd PIDs"))
+            plots.append(plot_with_bokeh(df_others, f"{pidstat_file} : others PIDs"))
+        else:
+            plots.append(plot_with_bokeh(df, f"{pidstat_file}", MODE))
 
 
     layout = column(*plots, sizing_mode="stretch_width")
-    show(layout)
-    
+    #show(layout)
+    save_name = input("save plot (NO/NAME)?\n")
+    if save_name != "NO":
+        output_file(save_name+".html", save_name)
+        save(layout)
+    else:
+        show(layout)
 
 
 if __name__ == "__main__":

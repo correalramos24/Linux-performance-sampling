@@ -3,11 +3,16 @@ from pathlib import Path
 import pandas as pd
 import re
 
-def parse_pidstat_file(fPath: Path):
+def parse_pidstat_file(fPath: Path, mode="cpu", target_app="ifsMASTER.SP"):
     
 
     with open(fPath, mode="r") as pidstat_file:
-        columns = ['Timestamp', 'UID', 'PID', '%usr', '%system', '%guest', '%wait', '%CPU', 'CPU', 'Command']
+        columns_cpu = ['Timestamp', 'UID', 'PID', '%usr', '%system', '%guest', '%wait', '%CPU', 'CPU', 'Command']
+        columns_io  = ['Timestamp', 'UID','PID', "kB_rd/s", 'kB_wr/s', 'kB_ccwr/s', 'iodelay', 'Command']
+        if mode == "cpu":
+            columns = columns_cpu
+        if mode == "io":
+            columns = columns_io
         num_cpus = None
         data = []
 
@@ -30,16 +35,20 @@ def parse_pidstat_file(fPath: Path):
             data.append(line_info)
         
         df = pd.DataFrame(data, columns=columns)
+        df_target_app = df[df['Command'] == target_app]
+        df[['Timestamp', 'UID', 'PID']] = df[['Timestamp', 'UID', 'PID']].astype(int)
 
-        df[['%usr', '%system', '%guest', '%wait', '%CPU']] = df[['%usr', '%system', '%guest', '%wait', '%CPU']].astype(float)
-        df[['Timestamp', 'UID', 'PID', 'CPU']] = df[['Timestamp', 'UID', 'PID', 'CPU']].astype(int)
+        if mode == "cpu":
+            df[['%usr', '%system', '%guest', '%wait', '%CPU']] = df[['%usr', '%system', '%guest', '%wait', '%CPU']].astype(float)
+            df[['Timestamp', 'UID', 'PID', 'CPU']] = df[['Timestamp', 'UID', 'PID', 'CPU']].astype(int)
 
-        df = df[['Timestamp', 'PID', 'CPU', '%CPU', '%usr', '%system', 'Command']]
-
-        df_nemo = df[df['Command'] == 'nemo']
-        print(f"Unique NEMO PIDs : {df_nemo['PID'].nunique()}")
-        print(f"Unique combinations of PID and CPU for NEMO, {len(df_nemo[['PID', 'CPU']].drop_duplicates())}")
-        print("WARNING! ONLY SHOWING NEMO PROCESSES")
-
+            df = df[['Timestamp', 'PID', 'CPU', '%CPU', '%usr', '%system', 'Command']]
+            
+            print(f"Unique combinations of PID and CPU for {target_app}, {len(df_target_app[['PID', 'CPU']].drop_duplicates())}")
+        if mode == "io":
+            df[["kB_rd/s", 'kB_wr/s', 'kB_ccwr/s']] = df[["kB_rd/s", 'kB_wr/s', 'kB_ccwr/s']].astype(float)
+            df[['iodelay']] = df[['iodelay']].astype(int)
+        
+        print(f"Unique {target_app} PIDs : {df_target_app['PID'].nunique()}")
 
         return num_cpus, df
