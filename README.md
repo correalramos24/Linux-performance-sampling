@@ -25,7 +25,7 @@ pip install -r requirements.txt
 ```
 
 ## Memory sampling
-A simple environment to trace and plot memory usage on a linux server cluster. 
+A simple environment to trace and plot memory usage on a linux server. 
 The python script parses the output of the `free` linux command.
 
 ![alt text](memory-sampling/examples/mem_big.png)
@@ -35,11 +35,12 @@ The python script parses the output of the `free` linux command.
 To collect the memory information, you need to execute the `free` command with 
 a certain sampling period and save the output into a plain text file. After 
 the execution, the plotting app can generate different plost with the memory 
-usage at each sampling instant. The `mem-sampling-wrapper.sh` file could be used.
+usage at each sampling instant. `mem-sampling-wrapper.sh` file could be used
+as example.
 
-For clusters using SLURM scheduling system, you can use `slurm.sh <jobId>` 
-for run the free command. If you don't have a parallel filesystem you need to
-gather all the files
+For clusters using SLURM scheduling system, you can use `slurm.sh <jobId>`. This
+script automatically attach to each node the free command.
+If you don't have a parallel filesystem you need to gather all the files manually.
 
 > It's important to NOT use the human-redable option (`-h, --human`). This 
 > feature will be added in a future to avoid use --units and --scale

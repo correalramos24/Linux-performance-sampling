@@ -16,4 +16,4 @@ kill $PID_FREE
 
 echo "All done"
 
-./app/main.py -f $MEM_FILE -s $SAMPLING_TIME
+your_path_to/memory-sampling/plot_app/main.py --input $MEM_FILE -samp $SAMPLING_TIME
