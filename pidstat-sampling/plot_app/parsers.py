@@ -3,12 +3,18 @@ from pathlib import Path
 import pandas as pd
 import re
 
-def parse_pidstat_file(fPath: Path, mode="cpu", target_app="ifsMASTER.SP"):
-    
+columns_cpu = ['Timestamp', 'UID', 'PID', '%usr', '%system', '%guest', '%wait', '%CPU', 'CPU', 'Command']
+columns_io  = ['Timestamp', 'UID','PID', "kB_rd/s", 'kB_wr/s', 'kB_ccwr/s', 'iodelay', 'Command']
+#columns_mem
+
+def parse_pidstat_file( fPath: Path, 
+                        mode: str,
+                        rel_ts: bool,
+                        drop_min: float = None,
+                        target_app="ifsMASTER.SP") -> tuple[int, pd.DataFrame]:
 
     with open(fPath, mode="r") as pidstat_file:
-        columns_cpu = ['Timestamp', 'UID', 'PID', '%usr', '%system', '%guest', '%wait', '%CPU', 'CPU', 'Command']
-        columns_io  = ['Timestamp', 'UID','PID', "kB_rd/s", 'kB_wr/s', 'kB_ccwr/s', 'iodelay', 'Command']
+        
         if mode == "cpu":
             columns = columns_cpu
         if mode == "io":
@@ -50,5 +56,26 @@ def parse_pidstat_file(fPath: Path, mode="cpu", target_app="ifsMASTER.SP"):
             df[['iodelay']] = df[['iodelay']].astype(int)
         
         print(f"Unique {target_app} PIDs : {df_target_app['PID'].nunique()}")
+
+        # Convert timestamp to human-readable:
+        if rel_ts:
+            min_timestamp = df['Timestamp'].min()
+            df['Timestamp'] = df['Timestamp'] - min_timestamp
+        else:
+            df['Timestamp'] = pd.to_datetime(df['Timestamp'], unit='s')
+            print("WARNING! Feature in development!")
+
+        if drop_min is not None:
+            print(drop_min, type(drop_min))
+            orinal_size=len(df)
+            # DROP PIDS that ! any >= 5% CPU usage
+            ids_to_keep = df.groupby('PID').filter(lambda x: (x['%CPU'] >= drop_min).any())['PID'].unique()
+            df = df[df['PID'].isin(ids_to_keep)]
+            
+            # DROP PIDs that more than /2 are NaN
+            threshold = len(df.columns) / 3
+            df = df.dropna(thresh=threshold)
+
+            print(f"{orinal_size-len(df)} records dropped. From {orinal_size} to {len(df)}")
 
         return num_cpus, df
