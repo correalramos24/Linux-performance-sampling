@@ -1,4 +1,3 @@
-#!/bin/python3
 
 from arguments import *
 from parsing import *
@@ -23,7 +22,7 @@ def main():
                 if unit_s != 1 and not percnt:
                     data = scale_data(data, swap, unit_s)
                 if percnt:
-                    data = compute_percnt(data, unit_s)
+                    data = compute_percnt(data, swap)
             # Append data to plot later
             results.append(data)
 

@@ -33,7 +33,7 @@ def parse_mem_file(fPath : Path, swap: bool = False, samp_time: int = 1) -> pd.D
     # 2. Build dataframe:
     cols = cols_mem if not swap else cols_mem + cols_swp
     df = pd.DataFrame(columns=cols, data=data).astype(int)
-    df["timing"] = df["timing"].astype(str)
+    #df["timing"] = df["timing"].astype(str)
     
     return df
 
