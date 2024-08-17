@@ -5,8 +5,8 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description="Memory sampling script")
 
 # INPUTS
-parser.add_argument('--input', required=True, 
-                    help="Input file(s), can use wildcard like *", nargs="+")
+parser.add_argument('input', nargs="+",
+                    help="Input file(s), can use wildcard like *")
 parser.add_argument('--samp',
                     help='Sampling time of the input file(s)', default=1)
 # SAVE NAME:
@@ -24,6 +24,8 @@ parser.add_argument('--units', default="KiB",
                     help="Set output units for the plots")
 parser.add_argument('--scale', default=1, 
                     help="Factor that will be divide the memory results")
+parser.add_argument('--available', action='store_true',
+                    help="Plot only the available memory")
 app_args = parser.parse_args()
 
 files  : list[Path] = app_args.input
@@ -32,6 +34,7 @@ sampl  : int  = int(app_args.samp)
 swap   : bool = app_args.swap
 total  : bool = app_args.total
 percnt : bool = app_args.percentage
+avail  : bool = app_args.available
 
 legend : bool = app_args.legend
 save   : str  = app_args.save

@@ -43,7 +43,7 @@ def compute_percnt(info: pd.DataFrame, swap: bool) -> pd.DataFrame:
         info["used_swap_perc"] = info["used_swap"] / info["total_swap"]
     return info
 
-def scale_data(info: pd.DataFrame, swap: bool, scale_factor: int) -> pd.DataFrame:
+def scale_data(info: pd.DataFrame, scale_factor: int) -> pd.DataFrame:
     not_timing = info.columns.difference(["timing"])
     info[not_timing] = info[not_timing].apply(lambda x : x / scale_factor)
     info[not_timing] = info[not_timing].round(2)

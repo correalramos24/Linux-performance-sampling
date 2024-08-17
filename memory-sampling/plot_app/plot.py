@@ -9,26 +9,35 @@ def plot_plt_mem_perc(results: list[pd.DataFrame],
                       plot_total: bool = False,
                       plot_legend : bool = False,
                       save_plot = None,
+                      avail_mode: bool = False,
                       plot_title : str = "Memory usage"
+                      
 ):
     import matplotlib.pyplot as plt
-    
+
     # PLOT SETUP:
     fig, ax = plt.subplots(figsize=(20,10))
     ax.set_title(plot_title)
     ax.set_xlabel('Time [s]')
     if plot_perc:
+        print("Plotting % of memory")
         ax.set_ylabel(f'Memory [%]')
         ax.set_ylim(-1,100)
+    elif avail_mode:
+        print("Ploting available memory statistic!")
+        ax.set_ylabel(f'Memory [{output_units}]')
     else:
+        print("Plotting used memory statistic")
         ax.set_ylabel(f'Memory [{output_units}]')
 
     # PLOT EACH MEM_INFO:
     for host, mem_info in zip(hostnames, results):
-        print("Plotting host", host)
         if plot_perc:
             ax.plot(mem_info["timing"], mem_info["used_perc"], 
                     label=f"{host} used mem %")
+        elif avail_mode:
+            ax.plot(mem_info["timing"], mem_info["available"], 
+                    label=f"{host} avail mem", color="orange")
         else:
             ax.plot(mem_info["timing"], mem_info["used"], 
                     label=f"{host} used mem")
